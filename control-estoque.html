@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controle de Estoque</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <div class="brand">
+          <span class="brand-logo">X</span>
+          <span class="brand-name">Sistema de Estoque</span>
+        </div>
+        <nav class="nav" id="nav">
+          <button class="nav-btn active" data-view="painel">Painel</button>
+          <button class="nav-btn" data-view="produtos">Produtos</button>
+          <button class="nav-btn" data-view="categorias">Categorias</button>
+          <button class="nav-btn" data-view="movimentações">Movimentações</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container content">
+      
+      <section id="view-painel" class="view">
+        <h1 class="page-title">Painel</h1>
+        <p class="page-sub">Visão geral do seu estoque</p>
+
+        <div class="cards">
+          <div class="card stat">
+            <span class="stat-label">Produtos cadastrados</span>
+            <span class="stat-value" id="stat-produtos">0</span>
+          </div>
+          <div class="card stat">
+            <span class="stat-label">Itens em estoque</span>
+            <span class="stat-value" id="stat-itens">0</span>
+          </div>
+          <div class="card stat">
+            <span class="stat-label">Valor em estoque</span>
+            <span class="stat-value money" id="stat-valor">R$ 0,00</span>
+          </div>
+          <div class="card stat">
+            <span class="stat-label">Alerta de estoque baixo</span>
+            <span class="stat-value danger" id="stat-alertas">0</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">Estoque baixo</h2>
+            <div id="lista-alertas" class="list"></div>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Produtos mais movimentados</h2>
+            <div id="lista-rankig" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      
+      <section id="view-produtos" class="view hidden">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Produtos</h1>
+            <p class="page-sub">Cadastro de produtos do comércio</p>
+          </div>
+          <button class="btn btn-primary" id="btn-novo-produto">+ Novo produto</button>
+        </div>
+
+        <div class="card no-pad">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Categorias</th>
+                <th class="num">Preço vendas</th>
+                <th class="num">Qtd.</th>
+                <th>Status</th>
+                <th class="acoes-col">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-produtos"></tbody>
+          </table>
+          <p class="empty" id="produtos-vazio">Nenhum produto cadastrado.</p>
+        </div>
+      </section>
+
+      
+      <section id="view-categorias" class="view hidden">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Categorias</h1>
+            <p class="page-sub">Organize seus produtos por categorias</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-categorias" class="inline-form">
+            <input type="text" id="input-categoria" class="input" placeholder="Nome da categoria" required />
+            <button type="submit" class="btn btn-primary">Adicionar</button>
+          </form>
+        </div>
+
+        <div class="card no-pad">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th class="num">Produtos</th>
+                <th class="acoes-col">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-categorias"></tbody>
+          </table>
+          <p class="empty" id="categorias-vazio">Nenhuma categoria cadastrada.</p>
+        </div>
+      </section>
+
+      
+      <section id="view-movimentacoes" class="view hidden">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Movimentações</h1>
+            <p class="page-sub">Registro entrada e saída do estoque</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-movimentacao" class="mov-form">
+            <div class="field">
+              <label for="mov-produto">Produto</label>
+              <select id="mov-produto" class="input" required></select>
+            </div>
+            <div class="field">
+              <label for="mov-tipo">Tipo</label>
+              <select id="mov-tipo" class="input">
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="mov-qtd">Quantidade</label>
+              <input type="number" id="mov-qtd" class="input" min="1" value="1" required />
+            </div>
+            <div class="field field-grow">
+              <label for="mov-obs">Observação (opcional)</label>
+              <input type="text" id="mov-obs" class="input" placeholder="Ex.: compra fornecedor" />
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar</button>
+          </form>
+        </div>
+
+        <div class="card no-pad">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Tipo</th>
+                <th class="num">Qtd.</th>
+                <th>Observação</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-movimentacoes"></tbody>
+          </table>
+          <p class="empty" id="movimentacoes-vazio">Nenhuma movimentação registrada.</p>
+        </div>
+      </section>
+    </main>
+
+    
+    <div class="modal-overlay hidden" id="modal-produto">
+      <div class="modal">
+        <h2 class="modal-title" id="modal-produto-titulo">Novo produto</h2>
+        <form id="form-produto" class="modal-form">
+          <input type="hidden" id="produto-id" />
+          <div class="field">
+            <label for="produto-nome">Nome</label>
+            <input type="text" id="produto-nome" class="input" required />
+          </div>
+          <div class="field">
+            <label for="produto-categoria">Categorias</label>
+            <select id="produto-categoria" class="input"></select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="produto-preco-compra">Preço de compra</label>
+              <input type="number" id="produto-preco-compra" class="input" min="0" step="0.01" value="0" />
+            </div>
+            <div class="field">
+              <label for="produto-preco-venda">Preço de venda</label>
+              <input type="number" id="produto-preco-venda" class="input" min="0" step="0.01" value="0" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="produto-quantidade">Quantidade inicial</label>
+              <input type="number" id="produto-quantidade" class="input" min="0" value="0" />
+            </div>
+            <div class="field">
+              <label for="produto-minimo">Estoque mínimo</label>
+              <input type="number" id="produto-minimo" class="input" min="0" value="0" />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="btn-cancelar-produto">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script src="app.js"></script>
+<style>
+    :root {
+  --bg: linear-gradient(135deg, #e8f7ee, #d8f3e2, #edf9f1);
+  --card: #ffffff;
+  --text: #1a2b22;
+  --muted: #647069;
+  --primary: #1f9d6b;
+  --primary-dark: #178055;
+  --primary-soft: #e6f4ee;
+  --border: #e2e8e4;
+  --danger: #d64545;
+  --danger-soft: #fceaea;
+  --warning: #b8860b;
+  --warning-soft: #fbf3e0;
+  --radius: 10px;
+  --shadow: 0 1px 3px rgba(16, 40, 30, 0.06), 0 1px 2px rgba(16, 40, 30, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+  padding-bottom: 120px;
+}
+
+.container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.topbar {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.topbar-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+}
+
+.brand-name {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.nav {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border-radius: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+  z-index: 9999;
+  overflow: hidden;
+}
+
+.nav::before {
+  content: "";
+  position: absolute;
+  top: -100%;
+  left: -50%;
+  width: 80%;
+  height: 300%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+  transform: rotate(25deg);
+  animation: liquidShine 8s linear infinite;
+}
+
+@keyframes liquidShine {
+  from {
+    left: -100%;
+  }
+  to {
+    left: 200%;
+  }
+}
+
+.nav-btn {
+  position: relative;
+  border: none;
+  background: transparent;
+  color: #444;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 14px 18px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 0.25s ease, background 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #111;
+  transform: translateY(-6px) scale(1.15);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+.nav-btn.active {
+  background: rgba(31, 157, 107, 0.92);
+  color: white;
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(31, 157, 107, 0.4);
+}
+
+.view {
+  animation: fadeSlide 0.35s ease;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content {
+  padding-top: 28px;
+  padding-bottom: 48px;
+}
+
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.page-sub {
+  color: var(--muted);
+  font-size: 14px;
+  margin-top: 2px;
+}
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin: 24px 0;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 18px;
+}
+
+.card.no-pad {
+  padding: 0;
+  overflow: hidden;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.stat-value {
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.stat-value.money {
+  font-size: 22px;
+  color: var(--primary-dark);
+}
+
+.stat-value.danger {
+  color: var(--danger);
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.list-item .li-nome {
+  font-weight: 500;
+}
+
+.list-item .li-info {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.table th,
+.table td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.table th {
+  background: #f0f5f2;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #fafcfb;
+}
+
+.num {
+  text-align: right;
+}
+
+.acoes-col {
+  text-align: right;
+  width: 1%;
+  white-space: nowrap;
+}
+
+.row-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.empty {
+  padding: 28px 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.badge-ok {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.badge-low {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.badge-zero {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badge-entrada {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.badge-saida {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.btn {
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover {
+  background: #f0f5f2;
+}
+
+.btn-sm {
+  padding: 5px 10px;
+  font-size: 13px;
+}
+
+.btn-link {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  padding: 5px 8px;
+  border-radius: 6px;
+  color: var(--primary-dark);
+}
+
+.btn-link:hover {
+  background: var(--primary-soft);
+}
+
+.btn-link.danger {
+  color: var(--danger);
+}
+
+.btn-link.danger:hover {
+  background: var(--danger-soft);
+}
+
+.input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 14px;
+  background: #fff;
+  color: var(--text);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-soft);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.field-grow {
+  flex: 1;
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.inline-form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.inline-form .input {
+  flex: 1;
+  min-width: 200px;
+}
+
+.mov-form {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.mov-form .field {
+  min-width: 140px;
+}
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(16, 40, 30, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+.modal {
+  background: var(--card);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 460px;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(16, 40, 30, 0.2);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 100;
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.toast.error {
+  background: var(--danger);
+}
+
+.toast.hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10px);
+  pointer-events: none;
+}
+
+@media (min-width: 720px) {
+  .cards {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .grid-2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+</style>
+
+<script>
+    
+const DB = {
+  read(chave) {
+    return JSON.parse(localStorage.getItem(chave) || "[]")
+  },
+  write(chave, dados) {
+    localStorage.setItem(chave, JSON.stringify(dados))
+  },
+}
+
+function novoId() {
+  return Date.now() + Math.floor(Math.random() * 1000)
+}
+
+function carregarDados() {
+  let categorias = DB.read("categorias")
+  if (categorias.length === 0) {
+    categorias = [{ id: novoId(), nome: "Geral" }]
+    DB.write("categorias", categorias)
+  }
+  return {
+    categorias,
+    produtos: DB.read("produtos"),
+    movimentacoes: DB.read("movimentacoes"),
+  }
+}
+
+let categorias = []
+let produtos = []
+let movimentacoes = []
+
+function recarregar() {
+  const dados = carregarDados()
+  categorias = dados.categorias
+  produtos = dados.produtos
+  movimentacoes = dados.movimentacoes
+}
+
+
+function formatarReal(valor) {
+  return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+}
+
+function formatarData(iso) {
+  const d = new Date(iso)
+  return (
+    d.toLocaleDateString("pt-BR") +
+    " " +
+    d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+  )
+}
+
+function nomeCategoria(id) {
+  const c = categorias.find((c) => c.id === id)
+  return c ? c.nome : "-"
+}
+
+function statusProduto(p) {
+  if (p.quantidade <= 0) return { label: "Sem estoque", classe: "badge-zero" }
+  if (p.quantidade <= p.estoqueMinimo) return { label: "Estoque baixo", classe: "badge-low" }
+  return { label: "Normal", classe: "badge-ok" }
+}
+
+let toastTimer
+function toast(mensagem, tipo = "ok") {
+  const el = document.getElementById("toast")
+  if (!el) return
+  el.textContent = mensagem
+  el.className = "toast " + (tipo === "error" ? "error" : "")
+  el.classList.remove("hidden")
+  clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => el.classList.add("hidden"), 2800)
+}
+
+
+function trocarTela(view) {
+  document.querySelectorAll(".view").forEach((s) => s.classList.add("hidden"))
+  const viewId = view === "movimentações" ? "view-movimentacoes" : "view-" + view
+  const el = document.getElementById(viewId)
+  if (el) el.classList.remove("hidden")
+  document
+    .querySelectorAll(".nav-btn")
+    .forEach((b) => b.classList.toggle("active", b.dataset.view === view))
+  renderizarTudo()
+}
+
+document.getElementById("nav").addEventListener("click", (e) => {
+  const btn = e.target.closest(".nav-btn")
+  if (btn) trocarTela(btn.dataset.view)
+})
+
+
+function renderizarPainel() {
+  const totalProdutos = produtos.length
+  const totalItens = produtos.reduce((s, p) => s + p.quantidade, 0)
+  const valorEstoque = produtos.reduce((s, p) => s + p.quantidade * p.precoVenda, 0)
+  const baixos = produtos.filter((p) => p.quantidade <= p.estoqueMinimo)
+  const elProdutos = document.getElementById("stat-produtos")
+  const elItens = document.getElementById("stat-itens")
+  const elValor = document.getElementById("stat-valor")
+  const elAlertas = document.getElementById("stat-alertas")
+
+  if (elProdutos) elProdutos.textContent = totalProdutos
+  if (elItens) elItens.textContent = totalItens
+  if (elValor) elValor.textContent = formatarReal(valorEstoque)
+  if (elAlertas) elAlertas.textContent = baixos.length
+
+  const alertasEl = document.getElementById("lista-alertas")
+  if (alertasEl) {
+    if (baixos.length === 0) {
+      alertasEl.innerHTML =
+        '<p class="empty">Nenhum produto com estoque baixo. Está tudo certo!</p>'
+    } else {
+      alertasEl.innerHTML = baixos
+        .map(
+          (p) => `
+          <div class="list-item">
+            <div>
+              <div class="li-nome">${p.nome}</div>
+              <div class="li-info">Mínimo: ${p.estoqueMinimo}</div>
+            </div>
+            <span class="badge ${statusProduto(p).classe}">${p.quantidade} un.</span>
+          </div>`,
+        )
+        .join("")
+    }
+  }
+
+  const contagem = {}
+  movimentacoes.forEach((m) => {
+    contagem[m.produtoId] = (contagem[m.produtoId] || 0) + m.quantidade
+  })
+
+  const ranking = Object.entries(contagem)
+    .map(([produtoId, total]) => {
+      const p = produtos.find((p) => p.id === Number(produtoId))
+      return p ? { nome: p.nome, total } : null
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5)
+
+  const rankingEl = document.getElementById("lista-rankig")
+  if (rankingEl) {
+    if (ranking.length === 0) {
+      rankingEl.innerHTML = '<p class="empty">Nenhuma movimentação registrada.</p>'
+    } else {
+      rankingEl.innerHTML = ranking
+        .map(
+          (r) => `
+          <div class="list-item">
+            <span class="li-nome">${r.nome}</span>
+            <span class="li-info">${r.total} un.</span>
+          </div>`,
+        )
+        .join("")
+    }
+  }
+}
+
+
+function renderizarCategorias() {
+  const tbody = document.getElementById("tabela-categorias")
+  const vazio = document.getElementById("categorias-vazio")
+
+  if (tbody) {
+    tbody.innerHTML = categorias
+      .map((c) => {
+        const qtd = produtos.filter((p) => p.categoriaId === c.id).length
+        return `
+        <tr>
+          <td>${c.nome}</td>
+          <td class="num">${qtd}</td>
+          <td class="acoes-col">
+            <div class="row-actions">
+              <button class="btn-link danger" data-acao="excluir-categoria" data-id="${c.id}">Excluir</button>
+            </div>
+          </td>
+        </tr>`
+      })
+      .join("")
+  }
+  if (vazio) vazio.classList.toggle("hidden", categorias.length > 0)
+}
+
+document.getElementById("form-categorias").addEventListener("submit", (e) => {
+  e.preventDefault()
+  const input = document.getElementById("input-categoria")
+  const nome = input.value.trim()
+  if (!nome) return
+  categorias.push({ id: novoId(), nome })
+  DB.write("categorias", categorias)
+  input.value = ""
+  toast("Categoria adicionada!")
+  renderizarTudo()
+})
+
+function excluirCategoria(id) {
+  const temProduto = produtos.some((p) => p.categoriaId === id)
+  if (temProduto) {
+    toast("Não é possível excluir: há produtos nesta categoria.", "error")
+    return
+  }
+  if (!confirm("Excluir esta categoria?")) return
+  categorias = categorias.filter((c) => c.id !== id)
+  DB.write("categorias", categorias)
+  toast("Categoria excluída.")
+  renderizarTudo()
+}
+
+
+function renderizarProdutos() {
+  const tbody = document.getElementById("tabela-produtos")
+  const vazio = document.getElementById("produtos-vazio")
+
+  if (tbody) {
+    tbody.innerHTML = produtos
+      .map((p) => {
+        const st = statusProduto(p)
+        return `
+        <tr>
+          <td>${p.nome}</td>
+          <td>${nomeCategoria(p.categoriaId)}</td>
+          <td class="num">${formatarReal(p.precoVenda)}</td>
+          <td class="num">${p.quantidade}</td>
+          <td><span class="badge ${st.classe}">${st.label}</span></td>
+          <td class="acoes-col">
+            <div class="row-actions">
+              <button class="btn-link" data-acao="editar-produto" data-id="${p.id}">Editar</button>
+              <button class="btn-link danger" data-acao="excluir-produto" data-id="${p.id}">Excluir</button>
+            </div>
+          </td>
+        </tr>`
+      })
+      .join("")
+  }
+  if (vazio) vazio.classList.toggle("hidden", produtos.length > 0)
+}
+
+function preencherSelectCategorias() {
+  const sel = document.getElementById("produto-categoria")
+  if (sel) sel.innerHTML = categorias.map((c) => `<option value="${c.id}">${c.nome}</option>`).join("")
+}
+
+const modal = document.getElementById("modal-produto")
+
+function abrirModalProduto(produto = null) {
+  preencherSelectCategorias()
+  const titulo = document.getElementById("modal-produto-titulo")
+
+  if (produto) {
+    titulo.textContent = "Editar produto"
+    document.getElementById("produto-id").value = produto.id
+    document.getElementById("produto-nome").value = produto.nome
+    document.getElementById("produto-categoria").value = produto.categoriaId
+    document.getElementById("produto-preco-compra").value = produto.precoCompra
+    document.getElementById("produto-preco-venda").value = produto.precoVenda
+    document.getElementById("produto-quantidade").value = produto.quantidade
+    document.getElementById("produto-quantidade").disabled = true
+    document.getElementById("produto-minimo").value = produto.estoqueMinimo
+  } else {
+    titulo.textContent = "Novo produto"
+    document.getElementById("form-produto").reset()
+    document.getElementById("produto-id").value = ""
+    document.getElementById("produto-quantidade").disabled = false
+  }
+  if (modal) modal.classList.remove("hidden")
+}
+
+function fecharModalProduto() {
+  if (modal) modal.classList.add("hidden")
+}
+
+document.getElementById("btn-novo-produto").addEventListener("click", () => {
+  if (categorias.length === 0) {
+    toast("Crie uma categoria primeiro.", "error")
+    return
+  }
+  abrirModalProduto()
+})
+
+document.getElementById("btn-cancelar-produto").addEventListener("click", fecharModalProduto)
+
+if (modal) {
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) fecharModalProduto()
+  })
+}
+
+document.getElementById("form-produto").addEventListener("submit", (e) => {
+  e.preventDefault()
+  const id = document.getElementById("produto-id").value
+  const dados = {
+    nome: document.getElementById("produto-nome").value.trim(),
+    categoriaId: Number(document.getElementById("produto-categoria").value),
+    precoCompra: Number(document.getElementById("produto-preco-compra").value) || 0,
+    precoVenda: Number(document.getElementById("produto-preco-venda").value) || 0,
+    quantidade: Number(document.getElementById("produto-quantidade").value) || 0,
+    estoqueMinimo: Number(document.getElementById("produto-minimo").value) || 0,
+  }
+
+  if (!dados.nome) {
+    toast("Informe o nome do produto.", "error")
+    return
+  }
+
+  if (id) {
+    const idx = produtos.findIndex((p) => p.id === Number(id))
+    if (idx !== -1) {
+      dados.quantidade = produtos[idx].quantidade
+      produtos[idx] = { ...produtos[idx], ...dados }
+      toast("Produto atualizado!")
+    }
+  } else {
+    produtos.push({ id: novoId(), ...dados, criadoEm: new Date().toISOString() })
+    toast("Produto cadastrado!")
+  }
+  DB.write("produtos", produtos)
+  fecharModalProduto()
+  renderizarTudo()
+})
+
+function editarProduto(id) {
+  const p = produtos.find((p) => p.id === id)
+  if (p) abrirModalProduto(p)
+}
+
+function excluirProduto(id) {
+  if (!confirm("Excluir este produto? As movimentações dele também serão removidas.")) return
+  produtos = produtos.filter((p) => p.id !== id)
+  movimentacoes = movimentacoes.filter((m) => m.produtoId !== id)
+  DB.write("produtos", produtos)
+  DB.write("movimentacoes", movimentacoes)
+  toast("Produto excluído.")
+  renderizarTudo()
+}
+
+
+function preencherSelectProdutosMov() {
+  const sel = document.getElementById("mov-produto")
+  if (!sel) return
+  if (produtos.length === 0) {
+    sel.innerHTML = '<option value="">Cadastre um produto primeiro</option>'
+  } else {
+    sel.innerHTML = produtos
+      .map((p) => `<option value="${p.id}">${p.nome} (estoque: ${p.quantidade})</option>`)
+      .join("")
+  }
+}
+
+function renderizarMovimentacoes() {
+  preencherSelectProdutosMov()
+  const tbody = document.getElementById("tabela-movimentacoes")
+  const vazio = document.getElementById("movimentacoes-vazio")
+
+  const ordenadas = [...movimentacoes].sort((a, b) => new Date(b.criadoEm) - new Date(a.criadoEm))
+
+  if (tbody) {
+    tbody.innerHTML = ordenadas
+      .map((m) => {
+        const p = produtos.find((p) => p.id === m.produtoId)
+        const badge = m.tipo === "entrada" ? "badge-entrada" : "badge-saida"
+        const sinal = m.tipo === "entrada" ? "+" : "-"
+        return `
+        <tr>
+          <td>${formatarData(m.criadoEm)}</td>
+          <td>${p ? p.nome : "(removido)"}</td>
+          <td><span class="badge ${badge}">${m.tipo === "entrada" ? "Entrada" : "Saída"}</span></td>
+          <td class="num">${sinal}${m.quantidade}</td>
+          <td>${m.observacao || "-"}</td>
+        </tr>`
+      })
+      .join("")
+  }
+  if (vazio) vazio.classList.toggle("hidden", movimentacoes.length > 0)
+}
+
+document.getElementById("form-movimentacao").addEventListener("submit", (e) => {
+  e.preventDefault()
+  const produtoId = Number(document.getElementById("mov-produto").value)
+  const tipo = document.getElementById("mov-tipo").value
+  const quantidade = Number(document.getElementById("mov-qtd").value)
+  const observacao = document.getElementById("mov-obs").value.trim()
+
+  const produto = produtos.find((p) => p.id === produtoId)
+  if (!produto) {
+    toast("Selecione um produto válido.", "error")
+    return
+  }
+  if (quantidade <= 0) {
+    toast("A quantidade deve ser maior que zero.", "error")
+    return
+  }
+  if (tipo === "saida" && quantidade > produto.quantidade) {
+    toast(`Estoque insuficiente. Disponível: ${produto.quantidade}.`, "error")
+    return
+  }
+
+  produto.quantidade += tipo === "entrada" ? quantidade : -quantidade
+
+  movimentacoes.push({
+    id: novoId(),
+    produtoId,
+    tipo,
+    quantidade,
+    observacao,
+    criadoEm: new Date().toISOString(),
+  })
+  DB.write("produtos", produtos)
+  DB.write("movimentacoes", movimentacoes)
+  document.getElementById("mov-qtd").value = 1
+  document.getElementById("mov-obs").value = ""
+  toast(tipo === "entrada" ? "Entrada registrada!" : "Saída registrada!")
+  renderizarTudo()
+})
+
+
+document.addEventListener("click", (e) => {
+  const btn = e.target.closest("[data-acao]")
+  if (!btn) return
+  const id = Number(btn.dataset.id)
+  switch (btn.dataset.acao) {
+    case "editar-produto":
+      editarProduto(id)
+      break
+    case "excluir-produto":
+      excluirProduto(id)
+      break
+    case "excluir-categoria":
+      excluirCategoria(id)
+      break
+  }
+})
+
+
+function renderizarTudo() {
+  recarregar()
+  renderizarPainel()
+  renderizarProdutos()
+  renderizarCategorias()
+  renderizarMovimentacoes()
+}
+
+recarregar()
+renderizarTudo()
+
+
+const dock = document.querySelector(".nav")
+const buttons = document.querySelectorAll(".nav-btn")
+
+dock.addEventListener("mousemove", (e) => {
+  buttons.forEach((btn) => {
+    const rect = btn.getBoundingClientRect()
+    const center = rect.left + rect.width / 2
+    const distance = Math.abs(e.clientX - center)
+    let scale = 1
+    if (distance < 150) {
+      scale = 1.4 - (distance / 150) * 0.4
+    }
+    btn.style.transform = `scale(${scale})`
+  })
+})
+
+dock.addEventListener("mouseleave", () => {
+  buttons.forEach((btn) => {
+    btn.style.transform = ""
+  })
+})
+</script>
+  </body>
+</html>
