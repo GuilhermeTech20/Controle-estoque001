@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Controle de Estoque</title>
+
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <div class="brand">
+          <span class="brand-logo">X</span>
+          <span class="brand-name">Sistema de Estoque</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="container content">
+      <section id="view-painel" class="view">
+        <h1 class="page-title">Painel</h1>
+        <p class="page-sub">Visão geral do seu estoque</p>
+
+        <div class="cards">
+          <div class="card stat">
+            <span class="stat-label">Produtos cadastrados</span>
+            <span class="stat-value" id="stat-produtos">0</span>
+          </div>
+          <div class="card stat">
+            <span class="stat-label">Itens em estoque</span>
+            <span class="stat-value" id="stat-itens">0</span>
+          </div>
+          <div class="card stat">
+            <span class="stat-label">Valor em estoque</span>
+            <span class="stat-value money" id="stat-valor">R$ 0,00</span>
+          </div>
+          <div class="card stat">
+            <span class="stat-label">Alerta de estoque baixo</span>
+            <span class="stat-value danger" id="stat-alertas">0</span>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">Estoque baixo</h2>
+            <div id="lista-alertas" class="list"></div>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Produtos mais movimentados</h2>
+            <div id="lista-rankig" class="list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-produtos" class="view hidden">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Produtos</h1>
+            <p class="page-sub">Cadastro de produtos do comércio</p>
+          </div>
+          <button class="btn btn-primary" id="btn-novo-produto">+ Novo produto</button>
+        </div>
+
+        <div class="card no-pad">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Categorias</th>
+                <th class="num">Preço vendas</th>
+                <th class="num">Qtd.</th>
+                <th>Status</th>
+                <th class="acoes-col">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-produtos"></tbody>
+          </table>
+          <p class="empty" id="produtos-vazio">Nenhum produto cadastrado.</p>
+        </div>
+      </section>
+
+      <section id="view-categorias" class="view hidden">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Categorias</h1>
+            <p class="page-sub">Organize seus produtos por categorias</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-categorias" class="inline-form">
+            <input type="text" id="input-categoria" class="input" placeholder="Nome da categoria" required />
+            <button type="submit" class="btn btn-primary">Adicionar</button>
+          </form>
+        </div>
+
+        <div class="card no-pad">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th class="num">Produtos</th>
+                <th class="acoes-col">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-categorias"></tbody>
+          </table>
+          <p class="empty" id="categorias-vazio">Nenhuma categoria cadastrada.</p>
+        </div>
+      </section>
+
+      <section id="view-movimentacoes" class="view hidden">
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Movimentações</h1>
+            <p class="page-sub">Registro entrada e saída do estoque</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <form id="form-movimentacao" class="mov-form">
+            <div class="field">
+              <label for="mov-produto">Produto</label>
+              <select id="mov-produto" class="input" required></select>
+            </div>
+            <div class="field">
+              <label for="mov-tipo">Tipo</label>
+              <select id="mov-tipo" class="input">
+                <option value="entrada">Entrada</option>
+                <option value="saida">Saída</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="mov-qtd">Quantidade</label>
+              <input type="number" id="mov-qtd" class="input" min="1" value="1" required />
+            </div>
+            <div class="field field-grow">
+              <label for="mov-obs">Observação (opcional)</label>
+              <input type="text" id="mov-obs" class="input" placeholder="Ex.: compra fornecedor" />
+            </div>
+            <button type="submit" class="btn btn-primary">Registrar</button>
+          </form>
+        </div>
+
+        <div class="card no-pad">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Produto</th>
+                <th>Tipo</th>
+                <th class="num">Qtd.</th>
+                <th>Observação</th>
+              </tr>
+            </thead>
+            <tbody id="tabela-movimentacoes"></tbody>
+          </table>
+          <p class="empty" id="movimentacoes-vazio">Nenhuma movimentação registrada.</p>
+        </div>
+      </section>
+
+      <footer>
+        <p>&copy; 2026 Sistema de controle de estoque, <em>todos os direitos reservados.</em></p>
+        <p>Desenvolvido por <a href="https://github.com/GuilhermeTech20" target="_blank" rel="noopener">Guilherme</a></p>
+      </footer>
+    </main>
+
+    <div class="modal-overlay hidden" id="modal-produto">
+      <div class="modal">
+        <h2 class="modal-title" id="modal-produto-titulo">Novo produto</h2>
+        <form id="form-produto" class="modal-form">
+          <input type="hidden" id="produto-id" />
+          <div class="field">
+            <label for="produto-nome">Nome</label>
+            <input type="text" id="produto-nome" class="input" required />
+          </div>
+          <div class="field">
+            <label for="produto-categoria">Categorias</label>
+            <select id="produto-categoria" class="input"></select>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="produto-preco-compra">Preço de compra</label>
+              <input type="number" id="produto-preco-compra" class="input" min="0" step="0.01" value="0" />
+            </div>
+            <div class="field">
+              <label for="produto-preco-venda">Preço de venda</label>
+              <input type="number" id="produto-preco-venda" class="input" min="0" step="0.01" value="0" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="produto-quantidade">Quantidade inicial</label>
+              <input type="number" id="produto-quantidade" class="input" min="0" value="0" />
+            </div>
+            <div class="field">
+              <label for="produto-minimo">Estoque mínimo</label>
+              <input type="number" id="produto-minimo" class="input" min="0" value="0" />
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-ghost" id="btn-cancelar-produto">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- ================= LIQUID GLASS DOCK ================= -->
+    <div class="dock-wrap">
+      <nav class="nav" id="nav">
+        <span class="glass-effect"></span>
+        <span class="glass-tint"></span>
+        <span class="glass-shine"></span>
+
+        <button class="nav-btn active" data-view="painel">
+          <span class="dock-tip">Painel</span>
+          <span class="dock-icon">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>
+          </span>
+          <span class="dock-label">Painel</span>
+        </button>
+
+        <button class="nav-btn" data-view="produtos">
+          <span class="dock-tip">Produtos</span>
+          <span class="dock-icon">
+            <svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.27 6.96 12 12.01l8.73-5.05"/><path d="M12 22.08V12"/></svg>
+          </span>
+          <span class="dock-label">Produtos</span>
+        </button>
+
+        <button class="nav-btn" data-view="categorias">
+          <span class="dock-tip">Categorias</span>
+          <span class="dock-icon">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3H4a1 1 0 0 0-1 1v5.59a2 2 0 0 0 .59 1.4l9.58 9.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83z"/><circle cx="7.5" cy="7.5" r="1.2" fill="currentColor" stroke="none"/></svg>
+          </span>
+          <span class="dock-label">Categorias</span>
+        </button>
+
+        <button class="nav-btn" data-view="movimentações">
+          <span class="dock-tip">Movimentações</span>
+          <span class="dock-icon">
+            <svg viewBox="0 0 24 24"><path d="M17 3v12"/><path d="m13 11 4 4 4-4"/><path d="M7 21V9"/><path d="m3 13 4-4 4 4"/></svg>
+          </span>
+          <span class="dock-label">Mov.</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- SVG filter that creates the liquid-glass refraction -->
+    <svg style="position:absolute;width:0;height:0" aria-hidden="true">
+      <defs>
+        <filter id="liquid-distortion" x="0%" y="0%" width="100%" height="100%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.008 0.008" numOctaves="2" seed="92" result="noise" />
+          <feGaussianBlur in="noise" stdDeviation="2" result="blurred" />
+          <feDisplacementMap in="SourceGraphic" in2="blurred" scale="60" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+      </defs>
+    </svg>
+    <script src="script.js"></script>
+  </body>
+</html>
